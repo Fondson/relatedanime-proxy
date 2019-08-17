@@ -1,7 +1,7 @@
 var express = require('express');
 var searchAnime = require('./searchAnime');
 var pingSelf = require('./pingSelf');
-// var redis = require('./redisHelper');
+var redis = require('./redisHelper');
 const path = require('path');
 
 pingSelf.pingHomepage();
@@ -17,33 +17,31 @@ app.use(function(req, res, next) {
     next();
 });
 
-// async function _preCrawl(malType, malId, req=null) {
-//     // check redis
-//     let redisResult = await redis.getSeries(malType, malId);
-//     if (redisResult !== null && redisResult !== undefined) {
-//         console.log(malType + ' ' + malId + ' served from redis!')
-//         return redisResult;
-//     } 
-//     // check db
-//     let neo4jResult = await neo4j.getFromDbByMalTypeAndMalId(malType, malId, req);
-//     if (neo4jResult !== null) {
-//         // explicitly not using await
-//         redis.setSeries(malType, malId, neo4jResult);
-//         console.log(malType + ' ' + malId + ' served from neo4j!')
-//         return neo4jResult;
-//     }
+async function _preCrawl(query) {
+    // check redis
+    let redisResult = await redis.get(query);
+    if (redisResult !== null && redisResult !== undefined) {
+        console.log(query + ' served from redis!')
+        return redisResult;
+    } 
 
-//     // couldn't find in redis or neo4j
-//     return null;
-// }
+    // couldn't find in redis
+    return null;
+}
 
-app.get('/api/search/:searchStr', function(req, res){
+app.get('/api/search/:searchStr', async function(req, res){
     const searchStr = req.params.searchStr;
     let count = 1;
     if (req.query.count > 1) {
         count = req.query.count;
     }
-    searchAnime(searchStr, res, count);
+
+    let redisResult = await _preCrawl(searchStr);
+    if (redisResult !== null) {
+        res.end( JSON.stringify({ error: false, data: redisResult.slice(0, count)}) );
+    } else {
+        searchAnime(searchStr, res, count);
+    }
 });
 
 app.listen(app.get('port'), () => {

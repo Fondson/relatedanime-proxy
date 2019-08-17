@@ -1,5 +1,6 @@
 var request = require('request');
 var cheerio = require('cheerio');
+var redis = require('./redisHelper');
 
 const MAL_TYPES = new Set(['anime', 'manga'])
 
@@ -58,6 +59,9 @@ function scrapSearch(searchStr, res, count) {
                     ret.push({name: urlsAndNames[i].name, malType: malType, id: id});
                 }
                 console.log(urlsAndNames);
+                if (ret.length >= 1) {
+                    redis.set(searchStr, ret);
+                }
                 res.end( JSON.stringify({ error: false, data: ret}) );
             }
             catch (e) {
