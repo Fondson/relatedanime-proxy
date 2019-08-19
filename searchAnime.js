@@ -60,13 +60,16 @@ async function scrapSearch(searchStr, res, count) {
         if (ret.length >= 1) {
             redis.set(searchStr, ret);
         }
-        res.end( JSON.stringify({ error: false, data: ret}) );
+        if (res) {
+            res.end( JSON.stringify({ error: false, data: ret}) );
+        }
     }
     catch (e) {
         console.log(e);
         if (e.statusCode == 429) {  // too many requests error
-            // try again
-            scrapSearch(searchStr, res, count);
+            // try again but send error to client
+            scrapSearch(searchStr, null, count);
+            res.end(JSON.stringify({ error: true, why: e }));
         } else {  // unhandled error
             res.end(JSON.stringify({ error: true, why: e }));
         }
