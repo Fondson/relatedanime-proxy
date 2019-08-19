@@ -18,12 +18,16 @@ app.use(function(req, res, next) {
 });
 
 async function _preCrawl(query) {
-    // check redis
-    let redisResult = await redis.get(query);
-    if (redisResult !== null && redisResult !== undefined) {
-        console.log(query + ' served from redis!')
-        return redisResult;
-    } 
+    try {
+        // check redis
+        let redisResult = await redis.get(query);
+        if (redisResult !== null && redisResult !== undefined) {
+            console.log(query + ' served from redis!')
+            return redisResult;
+        } 
+    } catch (e) {
+        console.log(e);
+    }
 
     // couldn't find in redis
     return null;

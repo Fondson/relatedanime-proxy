@@ -1,4 +1,4 @@
-var request = require('request');
+var request = require('request-promise');
 var cheerio = require('cheerio');
 var PromiseThrottle = require('promise-throttle');
 var redis = require('./redisHelper');
@@ -25,7 +25,7 @@ async function scrapSearch(searchStr, res, count) {
         // get the first header (either anime or manga)
         for (let i = 0; i < headers.length; ++i) {
             const curType = $(headers[i]).attr('id');
-            // console.log(curType);
+            console.log(curType);
             if (MAL_TYPES.has(curType)) {
                 malType = curType;
                 malEntries = $(headers[i]).next();
@@ -68,8 +68,7 @@ async function scrapSearch(searchStr, res, count) {
             // try again
             scrapSearch(searchStr, res, count);
         } else {  // unhandled error
-            console.log('searchAnime.js: status code ' + response.statusCode)
-            res.end(JSON.stringify({ error: true, why: 'status code ' + response.statusCode}));
+            res.end(JSON.stringify({ error: true, why: e }));
         }
     }
 }
