@@ -67,8 +67,13 @@ function scrapSearch(searchStr, res, count) {
             catch (e) {
                 console.log('searchAnime.js: ' + e)
                 res.end(JSON.stringify({ error: true, why: 'No such anime.'}));
-                return;
             }
+        } else if (response.statusCode === 429) {  // too many requests error
+            // try again
+            scrapSearch(searchStr, res, count);
+        } else {  // unhandled error
+            console.log('searchAnime.js: status code ' + response.statusCode)
+            res.end(JSON.stringify({ error: true, why: 'status code ' + response.statusCode}));
         }
     });
 }
