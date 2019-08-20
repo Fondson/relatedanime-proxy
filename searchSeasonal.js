@@ -4,13 +4,15 @@ var PromiseThrottle = require('promise-throttle');
 var redis = require('./redisHelper');
 
 const SEASONAL_KEY = '$seasonal$';
+// default every day
+const DEFAULT_REFRESH = 1000 * 60 * 60 * 24;
 
 var promiseThrottle = new PromiseThrottle({
     requestsPerSecond: 1,           // max requests per second
     promiseImplementation: Promise  // the Promise library you are using
 });
 
-function searchSeasonal(res){
+function searchSeasonal(res = null){
     scrapSearch(res);
 }
 
@@ -69,5 +71,15 @@ async function scrapSearch(res) {
         }
     }
 }
+
+
+function refreshSeasonal(interval) {
+    setInterval(function() {
+        console.log('Refreshing seasonal...');
+        searchSeasonal();
+    }, interval); 
+}
+refreshSeasonal(DEFAULT_REFRESH);
+
 
 module.exports = { searchSeasonal, SEASONAL_KEY };
