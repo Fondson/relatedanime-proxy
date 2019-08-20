@@ -2,6 +2,7 @@ var express = require('express');
 var searchAnime = require('./searchAnime');
 var pingSelf = require('./pingSelf');
 var redis = require('./redisHelper');
+var searchSeasonal = require('./searchSeasonal');
 const path = require('path');
 
 pingSelf.pingHomepage();
@@ -45,6 +46,15 @@ app.get('/api/search/:searchStr', async function(req, res){
         res.end( JSON.stringify({ error: false, data: redisResult.slice(0, count)}) );
     } else {
         searchAnime(searchStr, res, count);
+    }
+});
+
+app.get('/api/searchSeasonal', async function(req, res){
+    let redisResult = await _preCrawl(searchSeasonal.SEASONAL_KEY);
+    if (redisResult !== null) {
+        res.end( JSON.stringify({ error: false, data: redisResult }) );
+    } else {
+        searchSeasonal.searchSeasonal(res);
     }
 });
 

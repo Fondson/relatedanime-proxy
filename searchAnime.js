@@ -2,6 +2,7 @@ var request = require('request-promise');
 var cheerio = require('cheerio');
 var PromiseThrottle = require('promise-throttle');
 var redis = require('./redisHelper');
+var searchSeasonal = require('./searchSeasonal');
 
 const MAL_TYPES = new Set(['anime', 'manga'])
 var promiseThrottle = new PromiseThrottle({
@@ -10,6 +11,9 @@ var promiseThrottle = new PromiseThrottle({
 });
 
 function searchAnime(searchStr, res, count){
+    if (searchStr === searchSeasonal.SEASONAL_KEY) {
+        res.end(JSON.stringify({ error: true, why: 'invalid search string' }));
+    }
     scrapSearch(searchStr, res, count);
 }
 
@@ -57,7 +61,7 @@ async function scrapSearch(searchStr, res, count) {
             ret.push({name: urlsAndNames[i].name, malType: malType, id: id});
         }
         console.log(urlsAndNames);
-        if (ret.length >= 1) {
+        if (ret.length > 1) {
             redis.set(searchStr, ret);
         }
         if (res) {
