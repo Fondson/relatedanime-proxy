@@ -1,2 +1,2 @@
-# relatedanime-search
-Search service for www.relatedanime.com
+# relatedanime-proxy
+Proxy service for www.relatedanime.com
