@@ -25,6 +25,6 @@
     "request": "^2.88.0",
     "request-promise": "^4.2.4",
     "simple-sse": "0.0.3",
-    "url-parse": "^1.4.6"
+    "url-parse": "^1.5.0"
   }
 }
